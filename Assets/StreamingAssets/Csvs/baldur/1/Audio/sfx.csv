@@ -1,0 +1,10 @@
+Id,Index,Name,Loop,Volume,Effect,EffectDurationTime,StartAt,EndAt,Delay
+1,1,KeyboardType_1,true,50,,,,,
+2,2,PaperSlide_1,,50,,,,,
+3,3,Office_Chair_1,,50,,,,,
+4,4,Angry_Shock_1,,50,,,,,
+5,5,WindWhoosh_1,,50,,,,,
+6,6,CartoonPop_1,,50,,,,,
+7,7,KeyboardType_2,,50,,,,,
+8,8,Twinkle_1,,50,,,,,
+9,4,Angry_Shock_1,,50,,,,,0.5

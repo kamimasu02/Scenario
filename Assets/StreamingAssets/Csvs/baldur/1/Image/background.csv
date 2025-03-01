@@ -1,0 +1,6 @@
+Id,Index,Name,PosX,PosY,PosChangeTime,ScaleX,ScaleY,ScaleChangeTime,Color,ColorChangeTime,Effect,EffectDurationTime,AlphaValue,BlurValue
+1,1,Building At Night,,,,,,,,,,,,
+2,2,Office At Night,,,,,,,,,,,,
+3,3,Overnight Room,,,,,,,,,,,,
+4,4,Office At Morning,,,,,,,,,,,,
+5,2,Office At Night,,,,,,,,,FadeOut,1.5,,

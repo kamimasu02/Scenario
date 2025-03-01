@@ -1,0 +1,4 @@
+Id,Index,Name,PosX,PosY,PosChangeTime,ScaleX,ScaleY,ScaleChangeTime,Color,ColorChangeTime,Effect,EffectDurationTime,AlphaValue,BlurValue
+1,0,Black Screen,,,,,,,0.0.0,,,,,
+2,0,Black Screen Fade In,,,,,,,0.0.0,,FadeIn,1.5,,
+3,0,Black Screen Fade Out,,,,,,,0.0.0,,FadeOut,1.5,,

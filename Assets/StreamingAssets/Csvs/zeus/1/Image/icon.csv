@@ -1,0 +1,4 @@
+Id,Index,Name,PosX,PosY,PosChangeTime,ScaleX,ScaleY,ScaleChangeTime,Color,ColorChangeTime,Effect,EffectDurationTime,AlphaValue,BlurValue,Flip
+0,0,,,,,,,,,,,,,,
+1,1,Question Mark,6,20,,1.2,1.2,,,,,,,,
+2,2,Exclamation Mark,6,20,,1.2,1.2,,,,,,,,
