@@ -1,7 +1,0 @@
-Id,GroupId,Name,Index,PosX,PosY,PosChangeTime,ScaleX,ScaleY,ScaleChangeTime,Color,ColorChangeTime,Effect,EffectDurationTime,AlphaValue,BlurValue,Flip,AnimationState,IconId,Tag
-1,1,제우스 2번 표정,2,0,-300,,43,43,,,,,,,,,,,zeus
-2,2,제우스 3번 표정,3,0,-300,,43,43,,,,,,,,,,,zeus
-3,3,제우스 5번 표정,5,0,-300,,43,43,,,,,,,,,,,zeus
-4,4,제우스 6번 표정,6,0,-300,,43,43,,,,,,,,,,,zeus
-5,5,제우스 7번 표정,7,0,-300,,43,43,,,,,,,,,,,zeus
-6,6,제우스 C번 표정,12,0,-300,,43,43,,,,,,,,,,,zeus

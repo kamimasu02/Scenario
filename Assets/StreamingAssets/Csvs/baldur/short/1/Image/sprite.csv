@@ -1,5 +1,5 @@
 Id,GroupId,Name,Index,PosX,PosY,PosChangeTime,ScaleX,ScaleY,ScaleChangeTime,Color,ColorChangeTime,Effect,EffectDurationTime,AlphaValue,BlurValue,Flip,AnimationState,IconId,Tag
-0,0,baldur 기본표정,0,0,-310,,33,33,,,,,,,,,,,baldur
+0,0,baldur,0,0,-310,,33,33,,,,,,,,,,,baldur
 1,1,baldur 웃는표정,1,0,-310,,33,33,,,,,,,,,,,baldur
 2,2,baldur,2,0,-310,,33,33,,,,,,,,,,,baldur
 3,3,baldur,3,0,-310,,33,33,,,,,,,,,,,baldur
@@ -13,5 +13,8 @@ Id,GroupId,Name,Index,PosX,PosY,PosChangeTime,ScaleX,ScaleY,ScaleChangeTime,Colo
 11,11,baldur,6,0,-310,,33,33,,,,,,,,,,2,baldur
 12,12,baldur,0,0,-310,,33,33,,,,FadeOut,1.0,,,,,,baldur
 13,13,baldur,2,0,-310,,33,33,,,,FadeOut,1.0,0.75,,,,,baldur
-14,14,baldur,1,0,-310,,33,33,,255.255.255.192,,,,,,,,,baldur
+14,14,baldur,1,0,-310,,33,33,,255.255.255.75,,,,,,,,,baldur
 15,15,baldur,0,0,-310,,33,33,,,,FadeOut,1.0,0.75,,,,,baldur
+16,16,loki,6,400,-210,,48,48,,,,FadeOut,1.0,0.5,,,,,loki
+17,17,loki,7,400,-210,,48,48,,255.255.255.50,,,,,,,,,loki
+18,18,loki,0,400,-210,,48,48,,,,FadeOut,1.0,0.5,,,,,loki

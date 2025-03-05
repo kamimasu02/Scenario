@@ -97,12 +97,16 @@ Id,DialogueId,ChoiceId,SpriteId,ItemId,BackgroundId,ForegroundId,SceneId,AudioBG
 96,85,,11,,,,,,6,,
 97,86,,,,,,,,,,
 98,87,,,,,,,,,,
+111,,,16,,,,,,,true,true
 99,88,,,,,,,,,,
 100,89,,9,,,,,,,,
 101,90,,6,,,,,,,,
 102,91,,,,,,,,,,
 103,92,,,,,,,,,,
 104,93,,,,,,,,,,
+111,,,17,,,,,,,true,true
+112,148,,,,,,,,,true,true
+113,,,18,,,,,,,true,true
 105,94,,,,,,,,,,
 106,95,,2,,,,,,,,
 107,96,,,,,,,,,,
@@ -139,8 +143,8 @@ Id,DialogueId,ChoiceId,SpriteId,ItemId,BackgroundId,ForegroundId,SceneId,AudioBG
 138,122,,,,,,,,,,
 139,,,,,,11,,,,true,true
 140,123,,,,,,,,,,
-141,,,0,,4,,,,,,
-142,,,,,,5,,,,,
+141,,,0,,4,,,,,true,true
+142,,,,,,5,,,,true,true
 143,124,,,,,,,,,,
 144,125,,7,,,,,,,,
 145,126,,,,,,,,,,
@@ -169,3 +173,4 @@ Id,DialogueId,ChoiceId,SpriteId,ItemId,BackgroundId,ForegroundId,SceneId,AudioBG
 168,145,,,,,,,,,,
 169,146,,,,,,,,,,
 170,147,,,,,,,,,,
+171,,,,,,6,,,,true,true

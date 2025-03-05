@@ -1,1 +1,3 @@
 Id,Index,Name,PosX,PosY,PosChangeTime,ScaleX,ScaleY,ScaleChangeTime,Color,ColorChangeTime,Effect,EffectDurationTime,AlphaValue,BlurValue
+1,1,블러 처리된 기숙사(낮),,,,,,,,,,,,
+2,2,블러 처리된 기숙사(밤),,,,,,,,,,,,
