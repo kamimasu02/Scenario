@@ -6,6 +6,7 @@ using UnityEngine;
 public class DialogueData
 {
     private int COLOR_MAX_VALUE = 255;
+    private int ALPHA_MAX_VALUE = 100;
     private Color DEFAULT_COLOR = new Color(1.0f, 1.0f, 1.0f);
 
     public int id;
@@ -51,7 +52,7 @@ public class DialogueData
             return new Color(colorR,colorG,colorB);   
         }
 
-        float colorA = string.IsNullOrWhiteSpace(colorRGBA[3]) ? 0 : Mathf.Clamp01((float) Convert.ToInt16(colorRGBA[3]) / COLOR_MAX_VALUE);
+        float colorA = string.IsNullOrWhiteSpace(colorRGBA[3]) ? 0 : Mathf.Clamp01((float) Convert.ToInt16(colorRGBA[3]) / ALPHA_MAX_VALUE);
 
         return new Color(colorR, colorG, colorB, colorA);
     }

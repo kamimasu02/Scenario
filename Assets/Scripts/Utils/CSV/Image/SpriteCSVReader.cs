@@ -7,6 +7,7 @@ using UnityEngine;
 public class SpriteData
 {
     private int COLOR_MAX_VALUE = 255;
+    private int ALPHA_MAX_VALUE = 100;
 
     public int id;
     public int groupId;
@@ -34,12 +35,12 @@ public class SpriteData
         id = string.IsNullOrWhiteSpace(data[0]) ? -1 : Convert.ToInt16(data[0]);
         groupId = string.IsNullOrWhiteSpace(data[1]) ? -1 : Convert.ToInt16(data[1]);
         name = string.IsNullOrWhiteSpace(data[2]) ? "" : data[2];
-        index = string.IsNullOrWhiteSpace(data[3]) ? 0 : Convert.ToInt16(data[3]);
+        index = string.IsNullOrWhiteSpace(data[3]) ? -1 : Convert.ToInt16(data[3]);
         posX = string.IsNullOrWhiteSpace(data[4]) ? Single.NaN : float.Parse(data[4]);
         posY = string.IsNullOrWhiteSpace(data[5]) ? Single.NaN : float.Parse(data[5]);
         posChangeTime = string.IsNullOrWhiteSpace(data[6]) ? 0 : float.Parse(data[6]);
-        scaleX = string.IsNullOrWhiteSpace(data[7]) ? -1 : float.Parse(data[7]);
-        scaleY = string.IsNullOrWhiteSpace(data[8]) ? -1 : float.Parse(data[8]);
+        scaleX = string.IsNullOrWhiteSpace(data[7]) ? Single.NaN : float.Parse(data[7]);
+        scaleY = string.IsNullOrWhiteSpace(data[8]) ? Single.NaN : float.Parse(data[8]);
         scaleChangeTime = string.IsNullOrWhiteSpace(data[9]) ? 0 : float.Parse(data[9]);
         color = string.IsNullOrWhiteSpace(data[10]) ? null : ParseColor(data[10]);
         colorChangeTime = string.IsNullOrWhiteSpace(data[11]) ? 0 : float.Parse(data[11]);
@@ -71,7 +72,7 @@ public class SpriteData
             return new Color(colorR,colorG,colorB);   
         }
 
-        float colorA = string.IsNullOrWhiteSpace(colorRGBA[3]) ? 0 : Mathf.Clamp01((float) Convert.ToInt16(colorRGBA[3]) / COLOR_MAX_VALUE);
+        float colorA = string.IsNullOrWhiteSpace(colorRGBA[3]) ? 0 : Mathf.Clamp01((float) Convert.ToInt16(colorRGBA[3]) / ALPHA_MAX_VALUE);
 
         return new Color(colorR, colorG, colorB, colorA);
     }

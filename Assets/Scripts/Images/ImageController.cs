@@ -121,6 +121,7 @@ public class ImageController : MonoBehaviour
     public void Initialize()
     {
         img.sprite = null;
+        _prevImg.sprite = null;
     }
 
     public void SetImageIndex(int index)
@@ -130,7 +131,7 @@ public class ImageController : MonoBehaviour
             throw new ArgumentException("잘못된 Image Index 사용");
         }
 
-        if(_index != index)
+        if(index >= 0 && _index != index)
         {
             _index = index;
             _isIndexChanged = true;
@@ -201,8 +202,15 @@ public class ImageController : MonoBehaviour
         }
         else
         {
-            _posX = data.posX > 0 ? data.posX : 0;
-            _posY = data.posY > 0 ? data.posY : 0;
+            if(!float.IsNaN(data.posX))
+            {
+                _posX = data.posX;
+            }
+
+            if(!float.IsNaN(data.posY))
+            {
+                _posY = data.posY;
+            }
         }
 
         if(scaleDurationTime > 0)
@@ -212,8 +220,15 @@ public class ImageController : MonoBehaviour
         }
         else
         {
-            _scaleX = data.scaleX > 0 ? data.scaleX : 1;
-            _scaleY = data.scaleY > 0 ? data.scaleY : 1;
+            if(!float.IsNaN(data.scaleX))
+            {
+                _scaleX = data.scaleX;
+            }
+
+            if(!float.IsNaN(data.scaleY))
+            {
+                _scaleY = data.scaleY;
+            }
         }
 
         if(data.color is not null)

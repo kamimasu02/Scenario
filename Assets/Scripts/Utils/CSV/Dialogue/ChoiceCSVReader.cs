@@ -8,18 +8,14 @@ public class ChoiceData
     public int id;
     public int groupId;
     public string text;
-    public int choiceValue;
-    public int startIndex;
-    public int endIndex;
+    public string scriptFilePathWithName;
 
     public ChoiceData(string[] data)
     {
         id = string.IsNullOrWhiteSpace(data[0]) ? -1 : Convert.ToInt16(data[0]);
         groupId = string.IsNullOrWhiteSpace(data[1]) ? -1 : Convert.ToInt16(data[1]);
         text = string.IsNullOrWhiteSpace(data[2]) ? "" : data[2];
-        choiceValue = string.IsNullOrWhiteSpace(data[3]) ? -1 : Convert.ToInt16(data[3]);
-        startIndex = string.IsNullOrWhiteSpace(data[4]) ? -1 : Convert.ToInt16(data[4]);
-        endIndex = string.IsNullOrWhiteSpace(data[5]) ? -1 : Convert.ToInt16(data[5]);
+        scriptFilePathWithName = string.IsNullOrWhiteSpace(data[3]) ? "" : data[3];
     }
 }
 

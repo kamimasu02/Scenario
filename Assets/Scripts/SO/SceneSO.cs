@@ -6,6 +6,7 @@ using UnityEngine;
 public class SceneSO : ScriptableObject 
 {
     public int id = -1;
+    public string sceneName = "";
     public string title = "";
     public string path = "";
 }

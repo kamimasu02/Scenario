@@ -38,8 +38,8 @@ public class DialogueController : MonoBehaviour
 
     private string _currentName = "";
     private string _currentText = "";
-    private string _scriptName = "";
-    private string _scriptText = "";
+    private string _scriptDialogueName = "";
+    private string _scriptDialogueText = "";
     private string _tag = "";
 
     private float _typeSpeed = 0.05f;
@@ -72,7 +72,7 @@ public class DialogueController : MonoBehaviour
         dialogueText.text = "";
     }
 
-    public IEnumerator SetScriptData(DialogueData data)
+    public IEnumerator SetDialogueData(DialogueData data)
     {
         if(_currentName != data.name)
         {
@@ -80,8 +80,8 @@ public class DialogueController : MonoBehaviour
         }
 
         _id = data.id;
-        _scriptName = data.name;
-        _scriptText = data.text.Trim('"');
+        _scriptDialogueName = data.name;
+        _scriptDialogueText = data.text.Trim('"');
         _voiceIndex = data.voiceIndex;
         _tag = data.tag;
 
@@ -104,7 +104,7 @@ public class DialogueController : MonoBehaviour
 
         Queue<string> textQueue = new Queue<string>();
 
-        string[] splitedText = _scriptText.Split($"<{_PAUSE_TAG}>");
+        string[] splitedText = _scriptDialogueText.Split($"<{_PAUSE_TAG}>");
 
         for(int i = 0; i < splitedText.Length; i++)
         {

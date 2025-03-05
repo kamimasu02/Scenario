@@ -183,7 +183,7 @@ public class SpriteController : MonoBehaviour
             throw new ArgumentException("잘못된 Sprite Index 사용");
         }
 
-        if(_index != index)
+        if(index >= 0 && _index != index)
         {
             _index = index;
             _isIndexChanged = true;
@@ -337,12 +337,12 @@ public class SpriteController : MonoBehaviour
         }
         else
         {
-            if(data.scaleX > 0)
+            if(!float.IsNaN(data.scaleX))
             {
                 _scaleX = data.scaleX;
             }
 
-            if(data.scaleY > 0)
+            if(!float.IsNaN(data.scaleY))
             {
                 _scaleY = data.scaleY;
             }

@@ -1,14 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SceneController : MonoBehaviour
 {
-    [Header("Scenes")]
-    [SerializeField] SceneGroupSO[] sceneGroups;
     [Header("CSVs")]
     [SerializeField] GameObject csvObject;
 
@@ -27,8 +26,8 @@ public class SceneController : MonoBehaviour
     [SerializeField] GameObject audioBGMObject;
     [SerializeField] GameObject audioSFXObject;
 
-
     private SceneSO _currentScene;
+
     private CSVLoader _csvLoader;
     private AudioCSVReader _audioCSVReader;
     private CharacterCSVReader _charCSVReader;
@@ -52,6 +51,7 @@ public class SceneController : MonoBehaviour
 
     private bool _isAutoPass = false;
     private bool _isChoiceScript = false;
+    private bool _isSceneOver = false;
     private bool _blockScript = false;
     private bool _blockUserInteraction = false;
 
@@ -65,8 +65,8 @@ public class SceneController : MonoBehaviour
     private IconData[] _iconData;
     private ImageData[] _backgroundImageData;
     private ImageData[] _foregroundImageData;
-    private ImageData[] _sceneImageData;
     private ImageData[] _itemImageData;
+    private ImageData[] _sceneImageData;
     private ScriptData[] _scriptData;
     private SpriteData[] _spriteData;
     
@@ -98,10 +98,19 @@ public class SceneController : MonoBehaviour
         _backgroundImageController = backgroundImageObject.GetComponent<ImageController>();
         _foregroundImageController = foregroundImageObject.GetComponent<ImageController>();
         _sceneImageController = sceneImageObject.GetComponent<ImageController>();
+
+        _currentScene = SceneDataManager.Instance.GetCurrentScene();
+
+        LoadSceneData();
     }
 
     void Update()
     {
+        if(_isSceneOver)
+        {
+            QuitScene();
+        }
+
         if(Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
@@ -185,7 +194,7 @@ public class SceneController : MonoBehaviour
 
                     if(spriteDatum.iconId >= 0)
                     {
-                        IconData iconDatum = _iconData.Where(datum => datum.id == spriteDatum.iconId).ToArray()[0];
+                        IconData iconDatum = _iconData.Single(datum => datum.id == spriteDatum.iconId);
                         coroutineManager.StartCoroutineProcess(spriteController.SetSpriteData(spriteDatum, iconDatum));
                     }
                     else
@@ -197,7 +206,7 @@ public class SceneController : MonoBehaviour
 
             if(audioBGMId > 0)
             {
-                AudioData audioDatum = _audioBGMData.Where(datum => datum.id == audioBGMId).ToArray()[0];
+                AudioData audioDatum = _audioBGMData.Single(datum => datum.id == audioBGMId);
                 
                 if(audioDatum.index > 0)
                 {
@@ -215,7 +224,7 @@ public class SceneController : MonoBehaviour
 
             if(audioSFXId > 0)
             {
-                AudioData audioDatum = _audioSFXData.Where(datum => datum.id == audioSFXId).ToArray()[0];
+                AudioData audioDatum = _audioSFXData.Single(datum => datum.id == audioSFXId);
 
                 if(audioDatum.index > 0)
                 {
@@ -233,39 +242,39 @@ public class SceneController : MonoBehaviour
 
             if(itemId >= 0)
             {
-                ImageData imageDatum = _itemImageData.Where(datum => datum.id == itemId).ToArray()[0];
+                ImageData imageDatum = _itemImageData.Single(datum => datum.id == itemId);
                 coroutineManager.StartCoroutineProcess(_itemImageController.SetImageData(imageDatum));
             }
 
             if(backgroundId >= 0)
             {
-                ImageData imageDatum = _backgroundImageData.Where(datum => datum.id == backgroundId).ToArray()[0];
+                ImageData imageDatum = _backgroundImageData.Single(datum => datum.id == backgroundId);
                 coroutineManager.StartCoroutineProcess(_backgroundImageController.SetImageData(imageDatum));
             }
 
             if(foregroundId >= 0)
             {
-                ImageData imageDatum = _foregroundImageData.Where(datum => datum.id == foregroundId).ToArray()[0];
+                ImageData imageDatum = _foregroundImageData.Single(datum => datum.id == foregroundId);
                 coroutineManager.StartCoroutineProcess(_foregroundImageController.SetImageData(imageDatum));
             }
 
             if(sceneId >= 0)
             {
-                ImageData imageDatum = _sceneImageData.Where(datum => datum.id == sceneId).ToArray()[0];
+                ImageData imageDatum = _sceneImageData.Single(datum => datum.id == sceneId);
                 coroutineManager.StartCoroutineProcess(_sceneImageController.SetImageData(imageDatum));
             }
 
             if(dialogueId >= 0)
             {
-                DialogueData dialogueDatum = _dialogueData.Where(datum => datum.id == dialogueId).ToArray()[0];
-                coroutineManager.StartCoroutineProcess(_dialogueController.SetScriptData(dialogueDatum));
+                DialogueData dialogueDatum = _dialogueData.Single(datum => datum.id == dialogueId);
+                coroutineManager.StartCoroutineProcess(_dialogueController.SetDialogueData(dialogueDatum));
+            }
 
-                if(choiceId > 0)
-                {
-                    SetChoiceScript(true);
-                    ChoiceData[] choiceDataGroupById = _choiceData.Where(datum => datum.groupId == choiceId).ToArray();
-                    coroutineManager.StartCoroutineProcess(_choiceController.SetChoiceData(choiceDataGroupById));
-                }
+            if(choiceId > 0)
+            {
+                SetChoiceScript(true);
+                ChoiceData[] choiceDataGroupById = _choiceData.Where(datum => datum.groupId == choiceId).ToArray();
+                coroutineManager.StartCoroutineProcess(_choiceController.SetChoiceData(choiceDataGroupById));
             }
 
             if(autoPass)
@@ -284,6 +293,10 @@ public class SceneController : MonoBehaviour
             
 
             StartCoroutine(coroutineManager.CheckAllCoroutinesCompleted(InitializeAfterScriptProcess));
+        }
+        else
+        {
+            _isSceneOver = true;
         }
     }
 
@@ -309,6 +322,7 @@ public class SceneController : MonoBehaviour
         _foregroundImageData = _imageCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/foreground");
         _backgroundImageData = _imageCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/background");
         _iconData = _iconCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/icon");
+        _itemImageData = _imageCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/item");
         _sceneImageData = _imageCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/scene");
         _spriteData = _spriteCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/sprite");
     }
@@ -325,17 +339,24 @@ public class SceneController : MonoBehaviour
         ReadScript();
     }
 
+    void QuitScene()
+    {
+        SceneManager.LoadScene("SelectScene", LoadSceneMode.Single);
+    }
+
     public void HandleClickChoiceButton(ChoiceData data)
     {
-        _currentScriptData = new Queue<ScriptData>(_scriptData[data.startIndex..(data.endIndex + 1)]);
+        if(data.scriptFilePathWithName.Length > 0)
+        {
+            ScriptData[] nextScriptData = _scriptCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Script/{data.scriptFilePathWithName}");
+            _currentScriptData = new Queue<ScriptData>(nextScriptData);
+        }
+
         coroutineManager.StartCoroutineProcess(_choiceController.RemoveButtons(ProcessChoiceScript));
     }
 
-    public void LoadSceneData(string sceneCategory, int sceneId)
+    public void LoadSceneData()
     {
-        SceneGroupSO sceneGroup = sceneGroups.Where(sceneGroup => sceneGroup.category == sceneCategory).ToArray()[0];
-        _currentScene = sceneGroup.scenes.Where(scene => scene.id == sceneId).ToArray()[0];
-
         ScriptData[] csvScriptData = _scriptCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/script");
 
         _scriptData = csvScriptData;
