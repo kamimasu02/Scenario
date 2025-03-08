@@ -4,18 +4,14 @@ using UnityEngine;
 
 public class AudioEffectController : MonoBehaviour
 {
-    [SerializeField] GameObject scene;
-    [SerializeField] AudioSource source;
+    [SerializeField] private SceneController _sceneController;
+    [SerializeField] private AudioController _audioController;
+    [SerializeField] private AudioSource _source;
 
-    private SceneController _sceneController;
-    private AudioController _audioController;
     private AudioOption _options;
 
     void Start()
     {
-        _sceneController = scene.GetComponent<SceneController>();
-
-        _audioController = GetComponent<AudioController>();
         _options = _audioController.GetOption();
     }
 
@@ -26,7 +22,7 @@ public class AudioEffectController : MonoBehaviour
             yield return new WaitForSeconds(delay);
         }
 
-        source.Play();
+        _source.Play();
 
         float targetVolume = _options.volume * volume;
 
@@ -35,27 +31,27 @@ public class AudioEffectController : MonoBehaviour
         while (proceedTime < durationTime)
         {
             proceedTime += Time.deltaTime;
-            source.volume = targetVolume * Mathf.Clamp01(proceedTime / durationTime);
+            _source.volume = targetVolume * Mathf.Clamp01(proceedTime / durationTime);
             yield return null;
         }
 
-        source.volume = targetVolume;   
+        _source.volume = targetVolume;   
     }
 
-     public IEnumerator FadeOut(float durationTime)
+    public IEnumerator FadeOut(float durationTime)
     {
-        float originVolume = source.volume;
+        float originVolume = _source.volume;
 
         float proceedTime = 0f;
 
         while (proceedTime < durationTime)
         {
             proceedTime += Time.deltaTime;
-            source.volume = originVolume * Mathf.Clamp01(1 - (proceedTime / durationTime));
+            _source.volume = originVolume * Mathf.Clamp01(1 - (proceedTime / durationTime));
             yield return null;
         }
 
-        source.volume = 0f;
-        source.Stop();
+        _source.volume = 0f;
+        _source.Stop();
     }
 }

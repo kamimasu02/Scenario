@@ -8,46 +8,22 @@ using UnityEngine.UI;
 
 public class SceneController : MonoBehaviour
 {
-    [Header("CSVs")]
-    [SerializeField] GameObject csvObject;
+    [SerializeField] private CSVLoader _csvLoader;
+    [SerializeField] private CSVReader _csvReader;
 
-    [Header("Dialogues")]
-    [SerializeField] GameObject choiceObject;
-    [SerializeField] GameObject dialogueObject;
 
-    [Header("Images")]
-    [SerializeField] GameObject itemImageObject;
-    [SerializeField] GameObject backgroundImageObject;
-    [SerializeField] GameObject foregroundImageObject;
-    [SerializeField] GameObject sceneImageObject;
-    
+    [SerializeField] private AudioController _audioBGMController;
+    [SerializeField] private AudioController _audioSFXController;
 
-    [Header("Audios")]
-    [SerializeField] GameObject audioBGMObject;
-    [SerializeField] GameObject audioSFXObject;
+    [SerializeField] private ChoiceController _choiceController;
+    [SerializeField] private DialogueController _dialogueController;
+
+    [SerializeField] private ImageController _itemImageController;
+    [SerializeField] private ImageController _backgroundImageController;
+    [SerializeField] private ImageController _foregroundImageController;
+    [SerializeField] private ImageController _sceneImageController;
 
     private SceneSO _currentScene;
-
-    private CSVLoader _csvLoader;
-    private AudioCSVReader _audioCSVReader;
-    private CharacterCSVReader _charCSVReader;
-    private ChoiceCSVReader _choiceCSVReader;
-    private DialogueCSVReader _dialogueCSVReader;
-    private IconCSVReader _iconCSVReader;
-    private ImageCSVReader _imageCSVReader;
-    private ScriptCSVReader _scriptCSVReader;
-    private SpriteCSVReader _spriteCSVReader;
-
-    private AudioController _audioBGMController;
-    private AudioController _audioSFXController;
-
-    private ChoiceController _choiceController;
-    private DialogueController _dialogueController;
-
-    private ImageController _itemImageController;
-    private ImageController _backgroundImageController;
-    private ImageController _foregroundImageController;
-    private ImageController _sceneImageController;
 
     private bool _isAutoPass = false;
     private bool _isChoiceScript = false;
@@ -69,6 +45,8 @@ public class SceneController : MonoBehaviour
     private ImageData[] _sceneImageData;
     private ScriptData[] _scriptData;
     private SpriteData[] _spriteData;
+
+    private Dictionary<GameObject, SpriteController> _spriteControllerDict = new Dictionary<GameObject, SpriteController>();
     
     [Header("ETC")]
     public CoroutineManager coroutineManager;
@@ -77,28 +55,6 @@ public class SceneController : MonoBehaviour
     {
         coroutineManager = GetComponent<CoroutineManager>();
 
-        _csvLoader = csvObject.GetComponent<CSVLoader>();
-
-        _audioCSVReader = csvObject.GetComponent<AudioCSVReader>();
-        _charCSVReader = csvObject.GetComponent<CharacterCSVReader>();
-        _choiceCSVReader = csvObject.GetComponent<ChoiceCSVReader>();
-        _dialogueCSVReader = csvObject.GetComponent<DialogueCSVReader>();
-        _iconCSVReader = csvObject.GetComponent<IconCSVReader>();
-        _imageCSVReader = csvObject.GetComponent<ImageCSVReader>();
-        _scriptCSVReader = csvObject.GetComponent<ScriptCSVReader>();
-        _spriteCSVReader = csvObject.GetComponent<SpriteCSVReader>();
-
-        _audioBGMController = audioBGMObject.GetComponent<AudioController>();
-        _audioSFXController = audioSFXObject.GetComponent<AudioController>();
-
-        _choiceController = choiceObject.GetComponent<ChoiceController>();
-        _dialogueController = dialogueObject.GetComponent<DialogueController>();
-
-        _itemImageController = itemImageObject.GetComponent<ImageController>();
-        _backgroundImageController = backgroundImageObject.GetComponent<ImageController>();
-        _foregroundImageController = foregroundImageObject.GetComponent<ImageController>();
-        _sceneImageController = sceneImageObject.GetComponent<ImageController>();
-
         _currentScene = SceneDataManager.Instance.GetCurrentScene();
 
         LoadSceneData();
@@ -106,11 +62,20 @@ public class SceneController : MonoBehaviour
 
     void Update()
     {
+        CheckSceneIsOver();
+        ProcessScript();
+    }
+
+    void CheckSceneIsOver()
+    {
         if(_isSceneOver)
         {
             QuitScene();
         }
+    }
 
+    void ProcessScript()
+    {
         if(Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
@@ -118,47 +83,39 @@ public class SceneController : MonoBehaviour
 
         if(_isAutoPass)
         {
-            if(!_blockScript)
+            if(_blockScript) return;
+
+            if(_dialogueController.isTyping && _dialogueController.isTypingPaused)
             {
-                if(_dialogueController.isTyping && _dialogueController.isTypingPaused)
+                _dialogueController.PrintNextText();
+                return;
+            }
+            
+            ReadScript();
+            return;
+        }
+        else
+        {
+            if(_isChoiceScript) return;
+            
+            if(!Input.GetKeyDown(KeyCode.Mouse0) && !Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.Return)) return;
+            
+            if(_blockScript)
+            {
+                if(_blockUserInteraction || !_dialogueController.isTyping) return;
+        
+                if(_dialogueController.isTypingPaused)
                 {
                     _dialogueController.PrintNextText();
                 }
                 else
                 {
-                    ReadScript();
+                    _dialogueController.SkipTyping();
                 }
+                return;
             }
-        }
-        else
-        {
-            if(!_isChoiceScript)
-            {
-                if(Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
-                {
-                    if(!_blockScript)
-                    {
-                        ReadScript();
-                    }
-                    else
-                    {
-                        if(!_blockUserInteraction)
-                        {
-                            if(_dialogueController.isTyping)
-                            {
-                                if(_dialogueController.isTypingPaused)
-                                {
-                                    _dialogueController.PrintNextText();
-                                }
-                                else
-                                {
-                                    _dialogueController.SkipTyping();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+
+            ReadScript();
         }
     }
 
@@ -169,128 +126,13 @@ public class SceneController : MonoBehaviour
             ScriptData script = _currentScriptData.Dequeue();
 
             SetBlockScript(true);
-            
-            int id = script.id;
-            int choiceId = script.choiceId;
-            int dialogueId = script.dialogueId;
-            int spriteId = script.spriteId;
-            int itemId = script.itemId;
-            int backgroundId = script.backgroundId;
-            int foregroundId = script.foregroundId;
-            int sceneId = script.sceneId;
-            int audioBGMId = script.audioBGMId;
-            int audioSFXId = script.audioSFXId;
-            bool autoPass = script.autoPass;
-            bool blockInteraction = script.blockInteraction;
 
-            if(spriteId >= 0)
-            {
-                SpriteData[] filteredSpriteData = _spriteData.Where(datum => datum.groupId == spriteId).ToArray();
-                
-                foreach(SpriteData spriteDatum in filteredSpriteData)
-                {
-                    GameObject charObject = GameObject.FindGameObjectWithTag(spriteDatum.tag);
-                    SpriteController spriteController = charObject.GetComponent<SpriteController>();
+            ProcessSpriteData(script.spriteId);
+            ProcessAudioData(script.audioBGMId, script.audioSFXId);
+            ProcessImageData(script.backgroundId, script.foregroundId, script.itemId, script.sceneId);
+            ProcessDialogueData(script.dialogueId, script.choiceId);
 
-                    if(spriteDatum.iconId >= 0)
-                    {
-                        IconData iconDatum = _iconData.Single(datum => datum.id == spriteDatum.iconId);
-                        coroutineManager.StartCoroutineProcess(spriteController.SetSpriteData(spriteDatum, iconDatum));
-                    }
-                    else
-                    {
-                        coroutineManager.StartCoroutineProcess(spriteController.SetSpriteData(spriteDatum));
-                    }
-                }
-            }
-
-            if(audioBGMId > 0)
-            {
-                AudioData audioDatum = _audioBGMData.Single(datum => datum.id == audioBGMId);
-                
-                if(audioDatum.index > 0)
-                {
-                    _audioBGMController.Play(audioDatum);
-                }
-                else
-                {
-                    _audioBGMController.Stop(audioDatum);
-                }
-            }
-            else if(audioBGMId == 0)
-            {   
-                _audioBGMController.Stop();
-            }
-
-            if(audioSFXId > 0)
-            {
-                AudioData audioDatum = _audioSFXData.Single(datum => datum.id == audioSFXId);
-
-                if(audioDatum.index > 0)
-                {
-                    _audioSFXController.Play(audioDatum);
-                }
-                else
-                {
-                    _audioSFXController.Stop(audioDatum);
-                }
-            }
-            else if(audioSFXId == 0)
-            {
-                _audioSFXController.Stop();
-            }
-
-            if(itemId >= 0)
-            {
-                ImageData imageDatum = _itemImageData.Single(datum => datum.id == itemId);
-                coroutineManager.StartCoroutineProcess(_itemImageController.SetImageData(imageDatum));
-            }
-
-            if(backgroundId >= 0)
-            {
-                ImageData imageDatum = _backgroundImageData.Single(datum => datum.id == backgroundId);
-                coroutineManager.StartCoroutineProcess(_backgroundImageController.SetImageData(imageDatum));
-            }
-
-            if(foregroundId >= 0)
-            {
-                ImageData imageDatum = _foregroundImageData.Single(datum => datum.id == foregroundId);
-                coroutineManager.StartCoroutineProcess(_foregroundImageController.SetImageData(imageDatum));
-            }
-
-            if(sceneId >= 0)
-            {
-                ImageData imageDatum = _sceneImageData.Single(datum => datum.id == sceneId);
-                coroutineManager.StartCoroutineProcess(_sceneImageController.SetImageData(imageDatum));
-            }
-
-            if(dialogueId >= 0)
-            {
-                DialogueData dialogueDatum = _dialogueData.Single(datum => datum.id == dialogueId);
-                coroutineManager.StartCoroutineProcess(_dialogueController.SetDialogueData(dialogueDatum));
-            }
-
-            if(choiceId > 0)
-            {
-                SetChoiceScript(true);
-                ChoiceData[] choiceDataGroupById = _choiceData.Where(datum => datum.groupId == choiceId).ToArray();
-                coroutineManager.StartCoroutineProcess(_choiceController.SetChoiceData(choiceDataGroupById));
-            }
-
-            if(autoPass)
-            {
-                SetAutoPass(true);
-            }
-            else
-            {
-                SetAutoPass(false);
-            }
-
-            if(blockInteraction)
-            {
-                SetBlockUserInteraction(true);
-            }
-            
+            SetDialogueOption(script.blockInteraction, script.autoPass);
 
             StartCoroutine(coroutineManager.CheckAllCoroutinesCompleted(InitializeAfterScriptProcess));
         }
@@ -306,31 +148,152 @@ public class SceneController : MonoBehaviour
         {
             GameObject charObject = GameObject.FindGameObjectWithTag(charDatum.tag);
             SpriteController charSpriteController = charObject.GetComponent<SpriteController>();
+
+            _spriteControllerDict[charObject] = charSpriteController;
             charSpriteController.Initialize(charDatum);
         }
     }
 
     void LoadAudioData()
     {
-        _audioBGMData = _audioCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Audio/bgm");
-        _audioSFXData = _audioCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Audio/sfx");
+        _audioBGMData = _csvReader.LoadData<AudioData>(_csvLoader, $"{_currentScene.path}/Audio/bgm");
+        _audioSFXData = _csvReader.LoadData<AudioData>(_csvLoader, $"{_currentScene.path}/Audio/sfx");
     }
 
     void LoadImageData()
     {
-        _charData = _charCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/character");
-        _foregroundImageData = _imageCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/foreground");
-        _backgroundImageData = _imageCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/background");
-        _iconData = _iconCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/icon");
-        _itemImageData = _imageCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/item");
-        _sceneImageData = _imageCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/scene");
-        _spriteData = _spriteCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Image/sprite");
+        _charData = _csvReader.LoadData<CharacterData>(_csvLoader, $"{_currentScene.path}/Image/character");
+        _foregroundImageData = _csvReader.LoadData<ImageData>(_csvLoader, $"{_currentScene.path}/Image/foreground");
+        _backgroundImageData = _csvReader.LoadData<ImageData>(_csvLoader, $"{_currentScene.path}/Image/background");
+        _iconData = _csvReader.LoadData<IconData>(_csvLoader, $"{_currentScene.path}/Image/icon");
+        _itemImageData = _csvReader.LoadData<ImageData>(_csvLoader, $"{_currentScene.path}/Image/item");
+        _sceneImageData = _csvReader.LoadData<ImageData>(_csvLoader, $"{_currentScene.path}/Image/scene");
+        _spriteData = _csvReader.LoadData<SpriteData>(_csvLoader, $"{_currentScene.path}/Image/sprite");
     }
 
     void LoadDialogueData()
     {
-        _choiceData = _choiceCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Dialogue/choice");
-        _dialogueData = _dialogueCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Dialogue/dialogue");
+        _choiceData = _csvReader.LoadData<ChoiceData>(_csvLoader, $"{_currentScene.path}/Dialogue/choice");
+        _dialogueData = _csvReader.LoadData<DialogueData>(_csvLoader, $"{_currentScene.path}/Dialogue/dialogue");
+    }
+
+    void ProcessSpriteData(int spriteId)
+    {
+        if(spriteId >= 0)
+        {
+            SpriteData[] filteredSpriteData = _spriteData.Where(datum => datum.groupId == spriteId).ToArray();
+            
+            foreach(SpriteData spriteDatum in filteredSpriteData)
+            {
+                GameObject charObject = GameObject.FindGameObjectWithTag(spriteDatum.tag);
+                SpriteController spriteController = _spriteControllerDict[charObject];
+
+                if(spriteDatum.iconId >= 0)
+                {
+                    IconData iconDatum = _iconData.Single(datum => datum.id == spriteDatum.iconId);
+                    coroutineManager.StartCoroutineProcess(spriteController.SetSpriteData(spriteDatum, iconDatum));
+                }
+                else
+                {
+                    coroutineManager.StartCoroutineProcess(spriteController.SetSpriteData(spriteDatum));
+                }
+            }
+        }
+    }
+
+    void ProcessAudioData(int bgmId, int sfxId)
+    {
+        if(bgmId >= 0)
+        {
+            AudioData audioDatum = _audioBGMData.FirstOrDefault(datum => datum.id == bgmId);
+            _audioBGMController.SetData(audioDatum);
+        }
+
+        if(sfxId >= 0)
+        {
+            AudioData audioDatum = _audioSFXData.FirstOrDefault(datum => datum.id == sfxId);
+            _audioSFXController.SetData(audioDatum);
+        }
+    }
+
+    void ProcessImageData(int backgroundId, int foregroundId, int itemId, int sceneId)
+    {
+        if(backgroundId >= 0)
+        {
+            ImageData imageDatum = _backgroundImageData.FirstOrDefault(datum => datum.id == backgroundId);
+
+            if(imageDatum is not null)
+            {
+                coroutineManager.StartCoroutineProcess(_backgroundImageController.SetImageData(imageDatum));
+            }
+        }
+
+        if(foregroundId >= 0)
+        {
+            ImageData imageDatum = _foregroundImageData.FirstOrDefault(datum => datum.id == foregroundId);
+
+            if(imageDatum is not null)
+            {
+                coroutineManager.StartCoroutineProcess(_foregroundImageController.SetImageData(imageDatum));   
+            }
+        }
+
+        if(itemId >= 0)
+        {
+            ImageData imageDatum = _itemImageData.FirstOrDefault(datum => datum.id == itemId);
+
+            if(imageDatum is not null)
+            {
+                coroutineManager.StartCoroutineProcess(_itemImageController.SetImageData(imageDatum));   
+            }
+        }
+
+        if(sceneId >= 0)
+        {
+            ImageData imageDatum = _sceneImageData.FirstOrDefault(datum => datum.id == sceneId);
+
+            if(imageDatum is not null)
+            {
+                coroutineManager.StartCoroutineProcess(_sceneImageController.SetImageData(imageDatum));   
+            }
+        }
+    }
+
+    void ProcessDialogueData(int dialogueId, int choiceId)
+    {
+        if(dialogueId >= 0)
+        {
+            DialogueData dialogueDatum = _dialogueData.FirstOrDefault(datum => datum.id == dialogueId);
+            
+            if(dialogueDatum is not null)
+            {
+                coroutineManager.StartCoroutineProcess(_dialogueController.SetDialogueData(dialogueDatum));
+            }
+        }
+
+        if(choiceId > 0)
+        {
+            SetChoiceScript(true);
+            ChoiceData[] choiceDataGroupById = _choiceData.Where(datum => datum.groupId == choiceId).ToArray();
+            coroutineManager.StartCoroutineProcess(_choiceController.SetChoiceData(choiceDataGroupById));
+        }
+    }
+
+    void SetDialogueOption(bool blockInteraction, bool autoPass)
+    {
+        if(autoPass)
+        {
+            SetAutoPass(true);
+        }
+        else
+        {
+            SetAutoPass(false);
+        }
+
+        if(blockInteraction)
+        {
+            SetBlockUserInteraction(true);
+        }
     }
 
     void ProcessChoiceScript()
@@ -346,9 +309,11 @@ public class SceneController : MonoBehaviour
 
     public void HandleClickChoiceButton(ChoiceData data)
     {
+        _choiceController.DisableButtons();
+
         if(data.scriptFilePathWithName.Length > 0)
         {
-            ScriptData[] nextScriptData = _scriptCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/Script/{data.scriptFilePathWithName}");
+            ScriptData[] nextScriptData = _csvReader.LoadData<ScriptData>(_csvLoader, $"{_currentScene.path}/Script/{data.scriptFilePathWithName}");
             _currentScriptData = new Queue<ScriptData>(nextScriptData);
         }
 
@@ -357,7 +322,7 @@ public class SceneController : MonoBehaviour
 
     public void LoadSceneData()
     {
-        ScriptData[] csvScriptData = _scriptCSVReader.LoadData(_csvLoader, $"{_currentScene.path}/script");
+        ScriptData[] csvScriptData = _csvReader.LoadData<ScriptData>(_csvLoader, $"{_currentScene.path}/script");
 
         _scriptData = csvScriptData;
         _currentScriptData = new Queue<ScriptData>(csvScriptData);

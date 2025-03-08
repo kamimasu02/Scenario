@@ -6,29 +6,27 @@ using UnityEngine.UI;
 
 public class SpriteController : MonoBehaviour
 {
-    [SerializeField] GameObject scene;
-    [SerializeField] GameObject spriteObject;
-    [SerializeField] GameObject prevSpriteObject;
-    [SerializeField] GameObject iconObject;
+    [Header("Sprite")]
+    [SerializeField] private RectTransform _rectTransform;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
 
+    [Header("Previous Sprite")]
+    [SerializeField] private RectTransform _prevRectTransform;
+    [SerializeField] private SpriteRenderer _prevSpriteRenderer;
+
+    [Header("Controller")]
+    [SerializeField] private SceneController _sceneController;
+    [SerializeField] private SpriteEffectController _effectController;
+    [SerializeField] private IconController _iconController;
 
     [Header("Animation")]
-    [SerializeField] Animator animator;
+    [SerializeField] private Animator _animator;
 
 
     [Header("Sprite")]
-    [SerializeField] Sprite[] sprites;
+    [SerializeField] Sprite[] _sprites;
 
-    private SpriteRenderer _spriteRenderer;
-    private RectTransform _rectTransform;
-    private SpriteRenderer _prevSpriteRenderer;
-    private RectTransform _prevRectTransform;
-
-    private SceneController _sceneController;
-    private SpriteEffectController _effectController;
-    private IconController _iconController;
-
-    private Color DEFAULT_COLOR = new Color(1.0f, 1.0f, 1.0f);
+    private readonly Color _DEFAULT_COLOR = new Color(1.0f, 1.0f, 1.0f);
 
     private int _index = 0;
 
@@ -52,23 +50,13 @@ public class SpriteController : MonoBehaviour
 
     void Start()
     {
-        _effectController = GetComponent<SpriteEffectController>();
-
-        _sceneController = scene.GetComponent<SceneController>();
-        _iconController = iconObject.GetComponent<IconController>();
-
-        _rectTransform = spriteObject.GetComponent<RectTransform>();
-        _spriteRenderer = spriteObject.GetComponent<SpriteRenderer>();
-        _prevRectTransform = prevSpriteObject.GetComponent<RectTransform>();
-        _prevSpriteRenderer = prevSpriteObject.GetComponent<SpriteRenderer>();
-
         Color color = _spriteRenderer.color;
         _spriteRenderer.color = color;
     }
 
     void Update()
     {
-        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
 
         if (stateInfo.normalizedTime >= 1.0f && _animationState.EndsWith("Once"))
         {
@@ -95,7 +83,7 @@ public class SpriteController : MonoBehaviour
         {
             if(_spriteRenderer.color.a == 0)
             {
-                _spriteRenderer.color = DEFAULT_COLOR;                
+                _spriteRenderer.color = _DEFAULT_COLOR;                
             }
 
             if(_index == 0)
@@ -124,7 +112,7 @@ public class SpriteController : MonoBehaviour
                         _prevSpriteRenderer.sprite = _spriteRenderer.sprite;
                     }
                     
-                    _spriteRenderer.sprite = sprites[_index - 1];
+                    _spriteRenderer.sprite = _sprites[_index - 1];
                 }
             }
 
@@ -173,12 +161,11 @@ public class SpriteController : MonoBehaviour
         SetSpriteIndex(data.index);
         SetSpritePosition(data.posX, data.posY);
         SetSpriteScale(data.scaleX, data.scaleY);
-        // SetObjectActive(data.isActive);
     }
 
     public void SetSpriteIndex(int index)
     {
-        if (index < 0 && index >= sprites.Length)
+        if (index < 0 && index >= _sprites.Length)
         {
             throw new ArgumentException("잘못된 Sprite Index 사용");
         }
@@ -235,7 +222,7 @@ public class SpriteController : MonoBehaviour
 
     public void SetBoolAnimatorParameter(string animationState, bool boolValue)
     {
-        animator.SetBool($"is{animationState}", boolValue);
+        _animator.SetBool($"is{animationState}", boolValue);
 
         if (boolValue)
         {
@@ -249,17 +236,17 @@ public class SpriteController : MonoBehaviour
 
     public bool GetBoolAnimatorParameter(string animationState)
     {
-        return animator.GetBool($"is{animationState}");
+        return _animator.GetBool($"is{animationState}");
     }
 
     public void SetFloatAnimatorParameter(string parameterKey, float intValue)
     {
-        animator.SetFloat(parameterKey, intValue);
+        _animator.SetFloat(parameterKey, intValue);
     }
 
     public float GetFloatAnimatorParameter(string parameterKey)
     {
-        return animator.GetFloat(parameterKey);
+        return _animator.GetFloat(parameterKey);
     }
 
     #nullable enable

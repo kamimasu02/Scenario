@@ -6,11 +6,11 @@ using UnityEngine;
 public class IconController : MonoBehaviour
 {
     [Header("Transform")]
-    [SerializeField] RectTransform rt;
+    [SerializeField] private RectTransform _rt;
 
     [Header("Sprite")]
-    [SerializeField] SpriteRenderer spriteRenderer;
-    [SerializeField] Sprite[] sprites;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
+    [SerializeField] private Sprite[] _sprites;
 
     private int _index = 0;
 
@@ -30,24 +30,24 @@ public class IconController : MonoBehaviour
     {
         if(_index == 0)
         {
-            spriteRenderer.sprite = null;
+            _spriteRenderer.sprite = null;
         }
         else if(_index > 0)
         {
             if(_isSpriteChanged)
             {
-                spriteRenderer.sprite = sprites[_index - 1];
+                _spriteRenderer.sprite = _sprites[_index - 1];
                 _isSpriteChanged = false;
             }
         }
 
-        rt.anchoredPosition = new Vector2(_posX, _posY);
-        rt.localScale = new Vector2(_scaleX, _scaleY);
+        _rt.anchoredPosition = new Vector2(_posX, _posY);
+        _rt.localScale = new Vector2(_scaleX, _scaleY);
     }
 
     public void SetSpriteIndex(int index)
     {
-        if (index < 0 && index >= sprites.Length)
+        if (index < 0 && index >= _sprites.Length)
         {
             throw new ArgumentException("잘못된 Sprite Index 사용");
         }

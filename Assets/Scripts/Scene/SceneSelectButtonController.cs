@@ -5,19 +5,12 @@ using UnityEngine.UI;
 
 public class SceneSelectButtonController : MonoBehaviour
 {
-    [SerializeField] GameObject sceneSelectObject;
-    [SerializeField] SceneSO scene;
-
-    private SceneSelectController _sceneSelectController;
-
-    void Start()
-    {
-        _sceneSelectController = sceneSelectObject.GetComponent<SceneSelectController>();
-    }
+    [SerializeField] SceneSelectController _sceneSelectController;
+    [SerializeField] SceneSO _scene;
 
     public void OnButtonClick()
     {
-        SceneDataManager.Instance.SetCurrentScene(scene);
+        SceneDataManager.Instance.SetCurrentScene(_scene);
         _sceneSelectController.LoadScene();
     }
 }

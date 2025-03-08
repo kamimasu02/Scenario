@@ -7,20 +7,18 @@ using UnityEngine.UI;
 public class ImageController : MonoBehaviour
 {
     [Header("Transform")]
-    [SerializeField] RectTransform rt;
+    [SerializeField] private RectTransform _rt;
 
     [Header("Image")]
-    [SerializeField] GameObject scene;
-    [SerializeField] GameObject prevImgObject;
-    [SerializeField] Image img;
-    [SerializeField] Sprite[] sprites;
+    [SerializeField] private Image _img;
+    [SerializeField] private Image _prevImg;
+    [SerializeField] private Sprite[] _sprites;
+    
+    [Header("Scene")]
+    [SerializeField] private SceneController _sceneController;
+    [SerializeField] private ImageEffectController _effectController;
 
-    private Image _prevImg;
-
-    private SceneController _sceneController;
-    private ImageEffectController _effectController;
-
-    private Color DEFAULT_COLOR = new Color(1.0f, 1.0f, 1.0f);
+    private readonly Color _DEFAULT_COLOR = new Color(1.0f, 1.0f, 1.0f);
 
     private int _index = 0;
 
@@ -42,12 +40,6 @@ public class ImageController : MonoBehaviour
 
     void Start()
     {
-        _effectController = GetComponent<ImageEffectController>();
-
-        _sceneController = scene.GetComponent<SceneController>();
-
-        _prevImg = prevImgObject.GetComponent<Image>();
-
         Initialize();
     }
 
@@ -63,7 +55,7 @@ public class ImageController : MonoBehaviour
         {
             if(_index == 0)
             {
-                img.sprite = null;
+                _img.sprite = null;
             }
             else
             {
@@ -71,11 +63,11 @@ public class ImageController : MonoBehaviour
                 {
                     if(_hasEffect)
                     {
-                        _prevImg.sprite = img.sprite;
+                        _prevImg.sprite = _img.sprite;
                     }
 
-                    img.sprite = sprites[_index - 1];
-                    img.color = DEFAULT_COLOR;
+                    _img.sprite = _sprites[_index - 1];
+                    _img.color = _DEFAULT_COLOR;
                 }
             }
 
@@ -114,19 +106,19 @@ public class ImageController : MonoBehaviour
 
     private void UpdateObjectTransform()
     {
-        rt.anchoredPosition = new Vector2(_posX, _posY);
-        rt.localScale = new Vector2(_scaleX, _scaleY);
+        _rt.anchoredPosition = new Vector2(_posX, _posY);
+        _rt.localScale = new Vector2(_scaleX, _scaleY);
     }
 
     public void Initialize()
     {
-        img.sprite = null;
+        _img.sprite = null;
         _prevImg.sprite = null;
     }
 
     public void SetImageIndex(int index)
     {
-        if (index < 0 && index >= sprites.Length)
+        if (index < 0 && index >= _sprites.Length)
         {
             throw new ArgumentException("잘못된 Image Index 사용");
         }
@@ -171,7 +163,7 @@ public class ImageController : MonoBehaviour
         float originPosY = _posY;
         float originScaleX = _scaleX;
         float originScaleY = _scaleY;
-        Color originColor = img.color;
+        Color originColor = _img.color;
 
         float dPosX = 0f;
         float dPosY = 0f;
@@ -248,7 +240,7 @@ public class ImageController : MonoBehaviour
             }
             else
             {
-                img.color = dataColor;
+                _img.color = dataColor;
             }
         }
 
@@ -309,11 +301,11 @@ public class ImageController : MonoBehaviour
                         color = new Color(colorR, colorG, colorB);
                     }
 
-                    img.color = color;
+                    _img.color = color;
                 }
                 else
                 {
-                    img.color = dataColor;
+                    _img.color = dataColor;
                 }
             }
 

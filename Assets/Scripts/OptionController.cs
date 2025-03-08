@@ -34,9 +34,9 @@ public class OptionData
 
 public class OptionController : MonoBehaviour
 {
-    [SerializeField] GameObject audioBGMObject;
-    [SerializeField] GameObject audioSFXObject;
-    [SerializeField] GameObject dialogueObject;
+    [SerializeField] private AudioController _audioBGMController;
+    [SerializeField] private AudioController _audioSFXController;
+    [SerializeField] private DialogueController _dialogueController;
     
     public static OptionController Instance { get; private set; }
 
@@ -46,10 +46,6 @@ public class OptionController : MonoBehaviour
     public OptionData options = new OptionData();
 
     private Resolution[] _availableResolutions; 
-
-    private AudioController _audioBGMController;
-    private AudioController _audioSFXController;
-    private DialogueController _dialogueController;
     
     void Awake()
     {
@@ -67,10 +63,6 @@ public class OptionController : MonoBehaviour
 
     void Start()
     {
-        _audioBGMController = audioBGMObject.GetComponent<AudioController>();
-        _audioSFXController = audioSFXObject.GetComponent<AudioController>();
-        _dialogueController = dialogueObject.GetComponent<DialogueController>();
-
         LoadOptions();
     }
 

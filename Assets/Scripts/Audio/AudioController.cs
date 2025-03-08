@@ -10,36 +10,28 @@ public class AudioOption
 
 public class AudioController : MonoBehaviour
 {
-    [SerializeField] GameObject scene;
-    [SerializeField] AudioSource source;
-    [SerializeField] AudioClip[] audios;
+    [SerializeField] private SceneController _sceneController;
+    [SerializeField] private AudioEffectController _effectController;
+    [SerializeField] private AudioSource _source;
+    [SerializeField] private AudioClip[] _audios;
 
-    private SceneController _sceneController;
-    private AudioEffectController _effectController;
     private AudioOption _option = new AudioOption();
-
-    void Start()
-    {
-        _sceneController = scene.GetComponent<SceneController>();
-
-        _effectController = GetComponent<AudioEffectController>();
-    }
 
     public void Play(AudioData data)
     {
-        source.clip = audios[data.index - 1];
-        source.loop = data.loop;
-        source.time = data.startAt;
-        source.mute = _option.isMute;
+        _source.clip = _audios[data.index - 1];
+        _source.loop = data.loop;
+        _source.time = data.startAt;
+        _source.mute = _option.isMute;
 
-        if(source.isPlaying)
+        if(_source.isPlaying)
         {
-            source.Stop();
+            _source.Stop();
         }
 
         if(data.effect.Length > 0)
         {
-            source.volume = 0;
+            _source.volume = 0;
 
             switch(data.effect)
             {
@@ -57,11 +49,11 @@ public class AudioController : MonoBehaviour
         }
         else
         {
-            source.volume = data.volume > 0 ? Mathf.Clamp01(data.volume * _option.volume) : _option.volume;
+            _source.volume = data.volume > 0 ? Mathf.Clamp01(data.volume * _option.volume) : _option.volume;
 
             if(data.delay == 0)
             {
-                source.Play();
+                _source.Play();
             }
             else
             {
@@ -71,6 +63,25 @@ public class AudioController : MonoBehaviour
     }
 
     #nullable enable
+    public void SetData(AudioData? data)
+    {
+        if(data is not null)
+        {
+            if(data.index > 0)
+            {
+                Play(data);
+            }
+            else if(data.index == 0)
+            {
+                Stop(data);
+            }
+        }
+        else
+        {
+            Stop();
+        }
+    }
+
     public void Stop(AudioData? data = null)
     {
         if(data is not null)
@@ -86,12 +97,12 @@ public class AudioController : MonoBehaviour
             }
             else
             {
-                source.Stop();
+                _source.Stop();
             }
         }
         else
         {
-            source.Stop();
+            _source.Stop();
         }
     }
     #nullable disable
@@ -99,7 +110,7 @@ public class AudioController : MonoBehaviour
     IEnumerator PlayWithDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        source.Play();
+        _source.Play();
     }
 
     public void SetOption(float volume, bool isMute)

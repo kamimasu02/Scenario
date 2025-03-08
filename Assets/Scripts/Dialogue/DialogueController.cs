@@ -13,22 +13,19 @@ public class DialogueController : MonoBehaviour
         public float typeSpeed = 0.05f;
         public float autoSpeed = 0.5f;
     }
+    [SerializeField] private SceneController _sceneController;
 
-    [SerializeField] GameObject sceneObject;
-
-    [SerializeField] TextMeshProUGUI dialogueName;
-    [SerializeField] TextMeshProUGUI dialogueText;
+    [SerializeField] private TextMeshProUGUI _dialogueName;
+    [SerializeField] private TextMeshProUGUI _dialogueText;
 
     // 하단 상수는 옵션에 필요한 값과 그렇지 않은 값으로 분리 필요
-    [SerializeField] float DEFAULT_TYPE_SPEED = 0.05f;
-    [SerializeField] int DEFAULT_FONT_SIZE = 48;
+    [SerializeField] private const float _DEFAULT_TYPE_SPEED = 0.05f;
+    [SerializeField] private const int _DEFAULT_FONT_SIZE = 36;
 
     public bool isTyping = false;
     public bool isSkipTyping = false;
     public bool isTypingPaused = false;
     public bool hasNextText = false;
-
-    private SceneController _sceneController;
 
     private Color _fontColor;
 
@@ -38,15 +35,15 @@ public class DialogueController : MonoBehaviour
 
     private string _currentName = "";
     private string _currentText = "";
-    private string _scriptDialogueName = "";
-    private string _scriptDialogueText = "";
+    private string _script_DialogueName = "";
+    private string _script_DialogueText = "";
     private string _tag = "";
 
     private float _typeSpeed = 0.05f;
     
     private int _id = -1;
     private int _voiceIndex = -1;
-    private int _fontSize = 48;
+    private int _fontSize = 36;
 
     private Regex _tokenRegex = new Regex(@"<.*?>|.");
     private Regex _tagRegex = new Regex(@"</?(\w+)=?.*?>");
@@ -61,15 +58,13 @@ public class DialogueController : MonoBehaviour
 
     void Start()
     {
-        _sceneController = sceneObject.GetComponent<SceneController>();
-
         Initialize();
     }
 
     void  Initialize()
     {
-        dialogueName.text = "";
-        dialogueText.text = "";
+        _dialogueName.text = "";
+        _dialogueText.text = "";
     }
 
     public IEnumerator SetDialogueData(DialogueData data)
@@ -80,14 +75,14 @@ public class DialogueController : MonoBehaviour
         }
 
         _id = data.id;
-        _scriptDialogueName = data.name;
-        _scriptDialogueText = data.text.Trim('"');
+        _script_DialogueName = data.name;
+        _script_DialogueText = data.text.Trim('"');
         _voiceIndex = data.voiceIndex;
         _tag = data.tag;
 
-        _typeSpeed = data.typeSpeed > 0 ? data.typeSpeed : DEFAULT_TYPE_SPEED;
+        _typeSpeed = data.typeSpeed > 0 ? data.typeSpeed : _DEFAULT_TYPE_SPEED;
         _fontColor = data.fontColor;
-        _fontSize = data.fontSize > 0 ? data.fontSize : DEFAULT_FONT_SIZE;
+        _fontSize = data.fontSize > 0 ? data.fontSize : _DEFAULT_FONT_SIZE;
 
         if(_currentVoiceController is not null)
         {
@@ -97,14 +92,14 @@ public class DialogueController : MonoBehaviour
 
         isTyping = true;
         _currentText = "";
-        dialogueName.text = _currentName;
-        dialogueText.text = "";
-        dialogueText.color = _fontColor;
-        dialogueText.fontSize = _fontSize;
+        _dialogueName.text = _currentName;
+        _dialogueText.text = "";
+        _dialogueText.color = _fontColor;
+        _dialogueText.fontSize = _fontSize;
 
         Queue<string> textQueue = new Queue<string>();
 
-        string[] splitedText = _scriptDialogueText.Split($"<{_PAUSE_TAG}>");
+        string[] splitedText = _script_DialogueText.Split($"<{_PAUSE_TAG}>");
 
         for(int i = 0; i < splitedText.Length; i++)
         {
@@ -145,7 +140,7 @@ public class DialogueController : MonoBehaviour
                 if(isSkipTyping)
                 {
                     _currentText = prevScript + RemoveAllPauseTags(queuedText);
-                    dialogueText.text = _currentText;
+                    _dialogueText.text = _currentText;
                     break;
                 }
 
@@ -181,7 +176,7 @@ public class DialogueController : MonoBehaviour
                 closeTokens = tokenStack.Count > 0 ? CreateCloseTokens(tokenStack) : "";
                 currentScript += token;
                 _currentText = prevScript + currentScript + closeTokens;
-                dialogueText.text = _currentText;
+                _dialogueText.text = _currentText;
                 yield return new WaitForSeconds(_typeSpeed);
             }
 

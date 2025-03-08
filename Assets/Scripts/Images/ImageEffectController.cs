@@ -5,11 +5,9 @@ using UnityEngine.UI;
 
 public class ImageEffectController : MonoBehaviour
 {
-    [SerializeField] GameObject prevImgObject;
+    [SerializeField] private Image _img;
+    [SerializeField] private Image _prevImg;
 
-    [SerializeField] Image img;
-
-    private Image _prevImg;
     private Material _blurMaterial;
 
     void Start()
@@ -17,8 +15,6 @@ public class ImageEffectController : MonoBehaviour
         Shader blurShader = Resources.Load<Shader>("Shaders/BlurShader");
 
         _blurMaterial = new Material(blurShader);
-
-        _prevImg = prevImgObject.GetComponent<Image>();
     }
 
     public IEnumerator Blur(float durationTime, float blurValue)
@@ -27,7 +23,7 @@ public class ImageEffectController : MonoBehaviour
         {
             float proceedTime = 0f;
             
-            img.material = _blurMaterial;
+            _img.material = _blurMaterial;
 
             while (proceedTime < durationTime)
             {
@@ -43,7 +39,7 @@ public class ImageEffectController : MonoBehaviour
         {
             _blurMaterial.SetFloat("_BlurSize", blurValue);
 
-            img.material = null;
+            _img.material = null;
         }
     }
 
@@ -51,10 +47,10 @@ public class ImageEffectController : MonoBehaviour
     {
         if (nullableColor is Color targetColor)
         {
-            img.color = targetColor;
+            _img.color = targetColor;
         }
 
-        Color color = img.color;
+        Color color = _img.color;
         color.a = 0f;
 
         float proceedTime = 0f;
@@ -63,12 +59,12 @@ public class ImageEffectController : MonoBehaviour
         {
             proceedTime += Time.deltaTime;
             color.a = Mathf.Clamp01(1 - (proceedTime / durationTime));
-            img.color = color;
+            _img.color = color;
             yield return null;
         }
 
         color.a = 0f;
-        img.color = color;
+        _img.color = color;
         _prevImg.sprite = null;
     }
 
@@ -76,10 +72,10 @@ public class ImageEffectController : MonoBehaviour
     {
         if (nullableColor is Color targetColor)
         {
-            img.color = targetColor;
+            _img.color = targetColor;
         }
 
-        Color color = img.color;
+        Color color = _img.color;
         color.a = 1f;
 
         float proceedTime = 0f;
@@ -88,12 +84,12 @@ public class ImageEffectController : MonoBehaviour
         {
             proceedTime += Time.deltaTime;
             color.a = Mathf.Clamp01(proceedTime / durationTime);
-            img.color = color;
+            _img.color = color;
             yield return null;
         }
 
         color.a = 1f;
-        img.color = color;
+        _img.color = color;
         _prevImg.sprite = null;
     }
 }

@@ -10,53 +10,50 @@ public class VoiceController : MonoBehaviour
         public bool isMute = false;
     }
 
-    [SerializeField] GameObject sceneObject;
-    [SerializeField] AudioSource source;
-    [SerializeField] AudioClip[] voices;
+    [SerializeField] private SceneController _sceneController;
+    [SerializeField] private AudioSource _source;
+    [SerializeField] private AudioClip[] _voices;
 
-    private SceneController _sceneController;
     private VoiceOption _option = new VoiceOption();
 
     void Start()
     {
-        _sceneController = sceneObject.GetComponent<SceneController>();
-
         OptionController.VoiceOptionChange += UpdateVoiceOption;
     }
 
     public void Play(int index, float delay = 0)
     {
-        source.clip = voices[index - 1];
+        _source.clip = _voices[index - 1];
 
         if(delay == 0)
         {
-            source.Play();
+            _source.Play();
         }
         else
         {
-            _sceneController.coroutineManager.StartCoroutineProcess(PlayWithDelay(source, delay));
+            _sceneController.coroutineManager.StartCoroutineProcess(PlayWithDelay(delay));
         }
     }
 
     public void Stop()
     {
-        source.Stop();
+        _source.Stop();
     }
 
-    IEnumerator PlayWithDelay(AudioSource source, float delay)
+    IEnumerator PlayWithDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        source.Play();
+        _source.Play();
     }
 
     void UpdateVoiceOption(float volume, bool isMute)
     {
         _option.volume = volume;
         _option.isMute = isMute;
-        if(source is not null)
+        if(_source is not null)
         {
-            source.volume = _option.volume;
-            source.mute = _option.isMute;
+            _source.volume = _option.volume;
+            _source.mute = _option.isMute;
         }
     }
 

@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class SpriteEffectController : MonoBehaviour
 {
-    [SerializeField] GameObject spriteObject;
-    [SerializeField] GameObject prevSpriteObject;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
+    [SerializeField] private SpriteRenderer _prevSpriteRenderer;
 
-    private SpriteRenderer _spriteRenderer;
-    private SpriteRenderer _prevSpriteRenderer;
     private Material _blurMaterial;
 
     void Start()
@@ -16,9 +14,6 @@ public class SpriteEffectController : MonoBehaviour
         Shader blurShader = Resources.Load<Shader>("Shaders/BlurShader");
 
         _blurMaterial = new Material(blurShader);
-
-        _spriteRenderer = spriteObject.GetComponent<SpriteRenderer>();
-        _prevSpriteRenderer = prevSpriteObject.GetComponent<SpriteRenderer>();
     }
 
     public IEnumerator Blur(float durationTime, float blurValue)

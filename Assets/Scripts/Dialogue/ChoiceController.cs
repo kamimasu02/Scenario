@@ -7,22 +7,38 @@ using TMPro;
 
 public class ChoiceController : MonoBehaviour
 {
-    [SerializeField] GameObject canvasObjet;
-    [SerializeField] GameObject choicePrefab;
-    [SerializeField] GameObject sceneObject;
+    [SerializeField] private SceneController _sceneController;
+    [SerializeField] private GameObject _canvasObject;
 
-    [SerializeField] float FADE_TIME = 0.3f;
+    [SerializeField] private GameObject choicePrefab;
 
-    private float DESTROY_WAITING_TIME = 0.5f;
+    [SerializeField] private const float _FADE_TIME = 0.3f;
 
-    private Color DEFAULT_COLOR = new Color(1.0f, 1.0f, 1.0f);
+    [SerializeField] private const int _INITIAL_BUTTON_POOL_SIZE = 3;
 
-    private SceneController _sceneController;
-    private List<GameObject> buttonObjects = new List<GameObject>();
+    private List<GameObject> _buttonObjects = new List<GameObject>();
+    private Queue<GameObject> _buttonPool = new Queue<GameObject>();
+    private Dictionary<GameObject, Button> _buttonDict = new Dictionary<GameObject, Button>();
+    private Dictionary<GameObject, ButtonController> _buttonControllerDict = new Dictionary<GameObject, ButtonController>();
 
     void Start()
     {
-        _sceneController = sceneObject.GetComponent<SceneController>();
+        for (int i = 0; i < _INITIAL_BUTTON_POOL_SIZE; i++)
+        {
+            GameObject choiceButtonObject = Instantiate(choicePrefab, _canvasObject.transform);
+            InitializeButton(choiceButtonObject);
+            _buttonPool.Enqueue(choiceButtonObject);
+        }
+    }
+
+    void InitializeButton(GameObject choiceButtonObject)
+    {
+        choiceButtonObject.SetActive(false);
+        
+        _buttonDict[choiceButtonObject] = choiceButtonObject.GetComponent<Button>();
+        _buttonControllerDict[choiceButtonObject] = choiceButtonObject.GetComponent<ButtonController>();
+
+        Transform choiceTextTransform = choiceButtonObject.transform.Find("ChoiceText");
     }
 
     public IEnumerator SetChoiceData(ChoiceData[] data)
@@ -30,67 +46,89 @@ public class ChoiceController : MonoBehaviour
         for(int index = 0; index < data.Length; index++)
         {
             ChoiceData choiceDatum = data[index];
-            GameObject choiceButton = Instantiate(choicePrefab, canvasObjet.transform);
+            GameObject choiceButtonObject = GetButtonObject();
 
-            Image choiceImage = choiceButton.GetComponent<Image>();
+            choiceButtonObject.transform.localScale = Vector3.one;
+            choiceButtonObject.transform.localPosition = Vector3.zero;
 
-            choiceImage.color = DEFAULT_COLOR;
+            ButtonController choiceButtonController = _buttonControllerDict[choiceButtonObject];
+            choiceButtonController.SetChoiceData(data[index]);
 
-            choiceButton.transform.localScale = Vector3.one;
-            choiceButton.transform.localPosition = Vector3.zero;
-
-            Transform choiceTextTransform = choiceButton.transform.Find("ChoiceText");
-
-            if(choiceTextTransform is not null)
-            {
-                GameObject choiceText = choiceTextTransform.gameObject;
-                TextMeshProUGUI choiceTMP = choiceText.GetComponent<TextMeshProUGUI>();
-            
-                choiceTMP.text = choiceDatum.text;
-
-                buttonObjects.Add(choiceButton);;
-            }
+            _buttonObjects.Add(choiceButtonObject);
         }
 
-        if(buttonObjects.Count > 0)
+        foreach(GameObject choiceButtonObject in _buttonObjects)
         {
-            for(int index = 0; index < data.Length; index++)
-            {
-                GameObject choiceButtonObject = buttonObjects[index];
-
-                ButtonController choiceButtonController = choiceButtonObject.GetComponent<ButtonController>();
-                choiceButtonController.SetChoiceData(data[index]);
-
-                _sceneController.coroutineManager.StartCoroutineProcess(choiceButtonController.FadeOut(FADE_TIME));
-            }
+            ButtonController choiceButtonController = _buttonControllerDict[choiceButtonObject];
+            _sceneController.coroutineManager.StartCoroutineProcess(choiceButtonController.FadeOut(_FADE_TIME));
         }
 
-        yield return null;
+        yield return new WaitForSeconds(_FADE_TIME);
+
+        EnableButtons();
+    }
+
+    public void EnableButtons()
+    {
+        foreach(GameObject choiceButtonObject in _buttonObjects)
+        {
+            Button button = _buttonDict[choiceButtonObject];
+            button.interactable = true;
+        }
+    }
+
+    public void DisableButtons()
+    {
+        foreach(GameObject choiceButtonObject in _buttonObjects)
+        {
+            Button button = _buttonDict[choiceButtonObject];
+            button.interactable = false;
+        }
     }
 
     public IEnumerator RemoveButtons(Action callbackAction)
     {
-        if(buttonObjects.Count > 0)
+        
+        foreach(GameObject choiceButtonObject in _buttonObjects)
         {
-            foreach(GameObject choiceButton in buttonObjects)
-            {
-                ButtonController choiceButtonController = choiceButton.GetComponent<ButtonController>();
-
-                _sceneController.coroutineManager.StartCoroutineProcess(choiceButtonController.FadeIn(FADE_TIME));
-            }
+            ButtonController choiceButtonController = _buttonControllerDict[choiceButtonObject];
+            _sceneController.coroutineManager.StartCoroutineProcess(choiceButtonController.FadeIn(_FADE_TIME));
         }
 
-        yield return new WaitForSeconds(FADE_TIME + DESTROY_WAITING_TIME);
+        yield return new WaitForSeconds(_FADE_TIME);
 
-        foreach(GameObject choiceButton in buttonObjects)
+        foreach(GameObject choiceButtonObject in _buttonObjects)
         {
-            Destroy(choiceButton);
+            ButtonController choiceButtonController = _buttonControllerDict[choiceButtonObject];
+            choiceButtonController.ReturnToPool();
         }
 
-        buttonObjects.Clear();
+        _buttonObjects.Clear();
 
         callbackAction();
 
         yield return null;
+    }
+
+    GameObject GetButtonObject()
+    {
+        if(_buttonPool.Count > 0)
+        {
+            GameObject buttonObject = _buttonPool.Dequeue();
+            buttonObject.SetActive(true);
+            return buttonObject;
+        }
+        else
+        {
+            GameObject buttonObject = Instantiate(choicePrefab, _canvasObject.transform);
+            InitializeButton(buttonObject);
+            return buttonObject;
+        }
+    }
+
+    public void ReturnButtonObject(GameObject buttonObject)
+    {
+        buttonObject.SetActive(false);
+        _buttonPool.Enqueue(buttonObject);
     }
 }

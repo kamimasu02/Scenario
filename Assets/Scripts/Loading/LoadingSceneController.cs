@@ -8,23 +8,25 @@ using TMPro;
 public class LoadingSceneController : MonoBehaviour
 {
     [Header("Loading")]
-    [SerializeField] Slider loadingProgressBar;
-    [SerializeField] Image loadingImage;
-    [SerializeField] TextMeshProUGUI loadingText;
-    [SerializeField] GameObject iconObject;
-    [SerializeField] Sprite[] loadingImages;
+    [SerializeField] private Slider _loadingProgressBar;
+    [SerializeField] private Image _loadingImage;
+    [SerializeField] private TextMeshProUGUI _loadingText;
+    [SerializeField] private Sprite[] _loadingImages;
+    [SerializeField] private RectTransform _iconRectTransform;
 
-    private float _MIN_LOADING_TIME = 2.0f;
-    private float _ICON_ROTATION_VALUE = 0.5f;
-    private float _ICON_ROTATION_SPEED = 0.5f;
-    private float _MAX_DEGREE = 360;
+    private const float _MIN_LOADING_TIME = 2.0f;
+    private const float _ICON_ROTATION_VALUE = 0.5f;
+    private const float _ICON_ROTATION_SPEED = 0.5f;
+    private const float _MAX_DEGREE = 360;
 
-    private RectTransform _iconRectTransform;
 
     void Start()
     {
-        int imageIndex = Mathf.FloorToInt(Random.Range(0, loadingImages.Length));
-        loadingImage.sprite = loadingImages[imageIndex];
+        if(_loadingImages.Length > 0)
+        {
+            int imageIndex = Mathf.FloorToInt(Random.Range(0, _loadingImages.Length));
+            _loadingImage.sprite = _loadingImages[imageIndex];
+        }
 
         GameObject selectSceneObject = GameObject.Find("Select Scene");
 
@@ -32,8 +34,6 @@ public class LoadingSceneController : MonoBehaviour
         {
             Destroy(selectSceneObject);
         }
-
-        _iconRectTransform = iconObject.GetComponent<RectTransform>();
 
         SceneSO scene = SceneDataManager.Instance.GetCurrentScene();
 
@@ -45,8 +45,8 @@ public class LoadingSceneController : MonoBehaviour
     {
         float progress = LoadingDataManager.Instance.GetProgress();
 
-        loadingProgressBar.value = progress;
-        loadingText.text = progress >= 0.9f ? "100%" : (progress >= 0.1f ? $"{Mathf.FloorToInt(progress * 100f).ToString().PadLeft(4, ' ')}%" : $"{Mathf.FloorToInt(progress * 100f).ToString().PadLeft(5, ' ')}%");
+        _loadingProgressBar.value = progress;
+        _loadingText.text = progress >= 0.9f ? "100%" : (progress >= 0.1f ? $"{Mathf.FloorToInt(progress * 100f).ToString().PadLeft(4, ' ')}%" : $"{Mathf.FloorToInt(progress * 100f).ToString().PadLeft(5, ' ')}%");
     }
 
     IEnumerator RotateIcon()
